@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+'''
+@Project :   fastapi_dev_template
+@File    :   app.py.py
+@Contact :   zhoujin.huang@genpact.com
+@License :   https://www.genpact.com/privacy/terms-and-conditions
+@Revised              @Author           @Version    @Desciption
+------------------    --------------    --------    -----------
+5/23/2025 6:26 AM       Zhoujin Huang     1.0.0       None
+'''
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 
 # Configure logging
 import logging
@@ -35,77 +46,6 @@ else:
     static_dir = "static"
 
 app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
-
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# Pydantic model for items
-class Item(BaseModel):
-    id: Optional[int] = None
-    name: str
-    description: Optional[str] = None
-    price: float
-    is_available: bool = True
-
-
-# In-memory database
-items_db = []
-item_id_counter = 1
-
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to FastAPI Demo"}
-
-
-@app.get("/items", response_model=List[Item])
-async def get_items():
-    return items_db
-
-
-@app.get("/items/{item_id}", response_model=Item)
-async def get_item(item_id: int):
-    item = next((item for item in items_db if item.id == item_id), None)
-    if item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return item
-
-
-@app.post("/items", response_model=Item)
-async def create_item(item: Item):
-    global item_id_counter
-    item.id = item_id_counter
-    item_id_counter += 1
-    items_db.append(item)
-    return item
-
-
-@app.put("/items/{item_id}", response_model=Item)
-async def update_item(item_id: int, updated_item: Item):
-    item_index = next((index for index, item in enumerate(items_db) if item.id == item_id), None)
-    if item_index is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    updated_item.id = item_id
-    items_db[item_index] = updated_item
-    return updated_item
-
-
-@app.delete("/items/{item_id}")
-async def delete_item(item_id: int):
-    item_index = next((index for index, item in enumerate(items_db) if item.id == item_id), None)
-    if item_index is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    items_db.pop(item_index)
-    return {"message": "Item deleted successfully"}
 
 
 class SystemTrayApp:
